@@ -16,4 +16,5 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 USER app
 EXPOSE 3000
-CMD ["sh","-c","npx prisma db push --skip-generate && node dist/server.js"]
+CMD ["node","dist/server.js"]
+# ponytail: schema sync runs separately; app must boot even when DB temporarily unavailable.
