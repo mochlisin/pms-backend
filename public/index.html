@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>PMS Login</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#111;color:#eee;display:grid;place-items:center;height:100vh;margin:0}
+form{background:#1d1d22;padding:28px;border-radius:10px;width:300px;display:grid;gap:10px}
+input,button{padding:10px;border-radius:6px;border:1px solid #333;background:#111;color:#eee;font-size:14px}
+button{background:#3b82f6;border:0;cursor:pointer;font-weight:600}
+pre{white-space:pre-wrap;word-break:break-all;font-size:12px;color:#9ca3af;margin:0}
+</style>
+<form id="f">
+  <h2 style="margin:0 0 6px">PMS Login</h2>
+  <input name="email" type="email" placeholder="email" required>
+  <input name="password" type="password" placeholder="password" required>
+  <button>Login</button>
+  <pre id="out"></pre>
+</form>
+<script>
+f.onsubmit = async e => {
+  e.preventDefault();
+  const b = Object.fromEntries(new FormData(f));
+  const r = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(b)
+  });
+  const j = await r.json();
+  out.textContent = JSON.stringify(j, null, 2);
+  if (j.token) localStorage.setItem('token', j.token);
+};
+</script>

@@ -7,6 +7,7 @@ COPY prisma ./prisma
 RUN npm install
 COPY tsconfig.json ./
 COPY src ./src
+COPY public ./public
 RUN npx prisma generate && npm run build && npm prune --omit=dev
 FROM node:20-alpine
 WORKDIR /app
@@ -17,7 +18,8 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/public ./public
 USER app
 EXPOSE 3000
-CMD ["node","dist/server.js"]
+CMD ["sh","-c","npx prisma db push --skip-generate || true; node dist/server.js"]
 # ponytail: schema sync runs separately; app must boot even when DB temporarily unavailable.
