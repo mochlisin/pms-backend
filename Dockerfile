@@ -1,0 +1,19 @@
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+COPY prisma ./prisma
+RUN npm install
+COPY tsconfig.json ./
+COPY src ./src
+RUN npx prisma generate && npm run build && npm prune --omit=dev
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production PORT=3000
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+USER app
+EXPOSE 3000
+CMD ["sh","-c","npx prisma db push --skip-generate && node dist/server.js"]

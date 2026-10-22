@@ -1,0 +1,82 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.register = register;
+exports.login = login;
+exports.listUsers = listUsers;
+exports.updateRole = updateRole;
+const zod_1 = require("zod");
+const service = __importStar(require("../services/auth.service"));
+const roleEnum = zod_1.z.enum(['ADMIN', 'PROJECT_MANAGER', 'MEMBER']);
+const registerSchema = zod_1.z.object({
+    email: zod_1.z.string().email(),
+    password: zod_1.z.string().min(8),
+    name: zod_1.z.string().min(1),
+    role: roleEnum.optional(),
+});
+async function register(req, res, next) {
+    try {
+        res.status(201).json(await service.register(registerSchema.parse(req.body)));
+    }
+    catch (e) {
+        next(e);
+    }
+}
+async function login(req, res, next) {
+    try {
+        const b = zod_1.z.object({ email: zod_1.z.string().email(), password: zod_1.z.string() }).parse(req.body);
+        res.json(await service.login(b.email, b.password));
+    }
+    catch (e) {
+        next(e);
+    }
+}
+async function listUsers(_req, res, next) {
+    try {
+        res.json(await service.listUsers());
+    }
+    catch (e) {
+        next(e);
+    }
+}
+async function updateRole(req, res, next) {
+    try {
+        const { role } = zod_1.z.object({ role: roleEnum }).parse(req.body);
+        res.json(await service.updateRole(req.params.id, role));
+    }
+    catch (e) {
+        next(e);
+    }
+}
